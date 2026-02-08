@@ -8,6 +8,7 @@ config();
 
 const app = express();
 
+app.use(express.static("uploads"));
 app.use(express.json());
 
 app.use("/auth", authRouter);

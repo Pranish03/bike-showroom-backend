@@ -6,6 +6,8 @@ import {
   createBikeValidationSchema,
   updateBikeValidationSchema,
 } from "./validation.js";
+import { upload } from "../../lib/multer.js";
+import { deleteImage } from "../../utils/deleteImage.js";
 
 const bikeRouter = Router();
 
@@ -18,11 +20,19 @@ const bikeRouter = Router();
 bikeRouter.post(
   "/",
   requireAuth({ isAdmin: true }),
+  upload.single("image"),
   requireValidation(createBikeValidationSchema),
   async (req, res) => {
     try {
-      const data = req.body;
-      const bike = await Bike.create(data);
+      if (!req.file)
+        return res.status(400).json({ message: "Image is required" });
+
+      const data = req.parsed;
+      const imgUrl = req.file.path.replace("uploads/", "");
+
+      delete data.image;
+
+      const bike = await Bike.create({ ...data, image: imgUrl });
 
       return res
         .status(200)
@@ -78,19 +88,29 @@ bikeRouter.get("/:id", async (req, res) => {
 bikeRouter.put(
   "/:id",
   requireAuth({ isAdmin: true }),
+  upload.single("image"),
   requireValidation(updateBikeValidationSchema),
   async (req, res) => {
     try {
       const bikeId = req.params.id;
-      const data = req.body;
 
-      const bike = await Bike.findByIdAndUpdate(bikeId, data, { new: true });
-
+      const bike = await Bike.findById(bikeId);
       if (!bike) return res.status(404).json({ message: "Bike not found" });
+
+      const data = { ...req.parsed };
+
+      if (req.file) {
+        deleteImage(bike.image);
+        data.image = req.file.path.replace("uploads/", "");
+      }
+
+      const updatedBike = await Bike.findByIdAndUpdate(bikeId, data, {
+        new: true,
+      });
 
       return res
         .status(200)
-        .json({ message: "Bike updated successfully", bike });
+        .json({ message: "Bike updated successfully", updatedBike });
     } catch (error) {
       console.log(error);
       return res.status(500);
@@ -109,8 +129,9 @@ bikeRouter.delete("/:id", requireAuth({ isAdmin: true }), async (req, res) => {
     const bikeId = req.params.id;
 
     const bike = await Bike.findByIdAndDelete(bikeId);
-
     if (!bike) return res.status(404).json({ message: "Bike not found" });
+
+    deleteImage(bike.image);
 
     return res.status(200).json({ message: "Bike deleted successfully" });
   } catch (error) {
