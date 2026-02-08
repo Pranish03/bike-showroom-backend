@@ -14,7 +14,7 @@ const bikeRouter = Router();
 /**
  * @Desc   Create bike
  * @Access Admin
- * @API    POST /bike/
+ * @API    POST /bike
  */
 
 bikeRouter.post(
@@ -47,7 +47,7 @@ bikeRouter.post(
 /**
  * @Desc   Get all bikes
  * @Access All
- * @API    GET /bike/
+ * @API    GET /bike
  */
 
 bikeRouter.get("/", async (req, res) => {

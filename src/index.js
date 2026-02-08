@@ -3,6 +3,7 @@ import authRouter from "./routes/auth/index.js";
 import mongoose from "mongoose";
 import { config } from "dotenv";
 import bikeRouter from "./routes/bikes/index.js";
+import contactRouter from "./routes/contact/index.js";
 
 config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/auth", authRouter);
 app.use("/bike", bikeRouter);
+app.use("/contact", contactRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
