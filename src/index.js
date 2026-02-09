@@ -1,6 +1,7 @@
 import express from "express";
 import authRouter from "./routes/auth/index.js";
 import mongoose from "mongoose";
+import cors from "cors";
 import { config } from "dotenv";
 import bikeRouter from "./routes/bikes/index.js";
 import contactRouter from "./routes/contact/index.js";
@@ -11,6 +12,13 @@ const app = express();
 
 app.use(express.static("uploads"));
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 app.use("/auth", authRouter);
 app.use("/bike", bikeRouter);
