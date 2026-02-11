@@ -1,4 +1,3 @@
-// To do validation
 import { z } from "zod";
 
 export const createBikeValidationSchema = z.object({
