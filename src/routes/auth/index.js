@@ -1,5 +1,6 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import { User } from "./models.js";
 import { LoginValidationSchema, SignupValidationSchema } from "./validation.js";
 import { requireValidation } from "../../middlewares/requireValidation.js";
@@ -8,8 +9,8 @@ import { requireAuth } from "../../middlewares/requireAuth.js";
 const authRouter = Router();
 
 /**
- * @Desc   Regester user
- * @Access All
+ * @Desc   Register user
+ * @Access Guest only
  * @API    POST /auth/signup
  */
 
@@ -18,22 +19,28 @@ authRouter.post(
   requireValidation(SignupValidationSchema),
   async (req, res) => {
     try {
-      const data = req.parsed;
+      const { name, email, password } = req.parsed;
 
-      const existingUser = await User.findOne({
-        email: data.email,
-      });
+      const existingUser = await User.findOne({ email });
 
       if (existingUser)
         return res.status(400).json({
-          message: "User already exits",
+          message: "Email is already taken",
         });
 
-      const user = await User.create(data);
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      const user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+      });
+
+      const { password: _, ...safeUser } = user;
 
       return res.status(201).json({
-        message: "Welcome",
-        data: user,
+        message: "Please login",
+        data: safeUser,
       });
     } catch (error) {
       console.log(error);
@@ -53,16 +60,23 @@ authRouter.post(
   requireValidation(LoginValidationSchema),
   async (req, res) => {
     try {
-      const data = req.parsed;
+      const { email, password } = req.parsed;
 
-      const existingUser = await User.findOne({
-        email: data.email,
-        password: data.password,
-      }).select("-password");
+      const existingUser = await User.findOne({ email });
 
       if (!existingUser)
         return res.status(400).json({
-          message: "User does not already exits",
+          message: "Invalid email or password",
+        });
+
+      const matchPassword = await bcrypt.compare(
+        password,
+        existingUser.password,
+      );
+
+      if (!matchPassword)
+        return res.status(400).json({
+          message: "Invalid email or password",
         });
 
       const token = jwt.sign(
@@ -75,10 +89,12 @@ authRouter.post(
         },
       );
 
+      const { password: _, safeUser } = existingUser;
+
       return res.status(201).json({
-        message: "Welcome to login",
+        message: "Welcome to bike showroom",
         data: {
-          user: existingUser,
+          user: safeUser,
           token,
         },
       });
@@ -97,9 +113,11 @@ authRouter.post(
 
 authRouter.get("/me", requireAuth(), async (req, res) => {
   try {
+    const { password, ...safeUser } = req.user;
+
     return res.status(200).json({
       message: "Your profile",
-      data: req.user,
+      data: safeUser,
     });
   } catch (error) {
     console.log(error);

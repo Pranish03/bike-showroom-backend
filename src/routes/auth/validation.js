@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const SignupValidationSchema = z.object({
-  username: z.string().optional(),
+  name: z.string().optional(),
   email: z.email(),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
