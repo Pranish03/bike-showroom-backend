@@ -39,7 +39,7 @@ authRouter.post(
       const { password: _, ...safeUser } = user;
 
       return res.status(201).json({
-        message: "Please login",
+        message: "Please login to continue",
         data: safeUser,
       });
     } catch (error) {
