@@ -3,6 +3,10 @@
 Create a `.env` file in the **root directory** and add the following:
 
 ```env
+PORT=port_number
+SERVER_URL=backend_url
+CLIENT_URL=frontend_url
+
 MONGO_URL=your_mongodb_connection_string
 JWT_SECRET_KEY=your_secret_key
 
