@@ -54,7 +54,12 @@ bikeRouter.get("/", async (req, res) => {
   try {
     const bikes = await Bike.find().select("-details");
 
-    return res.status(200).json({ bikes });
+    const bikesWithImageUrl = bikes.map((bike) => ({
+      ...bike.toObject(),
+      image: `${process.env.SERVER_URL}/${bike.image}`,
+    }));
+
+    return res.status(200).json({ bikes: bikesWithImageUrl });
   } catch (error) {
     console.log(error);
     return res.status(500);
@@ -72,7 +77,12 @@ bikeRouter.get("/:id", async (req, res) => {
     const bikeId = req.params.id;
     const bike = await Bike.findById(bikeId);
 
-    return res.status(200).json({ bike });
+    const bikeWithImageUrl = {
+      ...bike.toObject(),
+      image: `${process.env.SERVER_URL}/${bike.image}`,
+    };
+
+    return res.status(200).json({ bike: bikeWithImageUrl });
   } catch (error) {
     console.log(error);
     return res.status(500);
