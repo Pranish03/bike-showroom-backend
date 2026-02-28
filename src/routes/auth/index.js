@@ -36,7 +36,7 @@ authRouter.post(
         password: hashedPassword,
       });
 
-      const { password: _, ...safeUser } = user;
+      const { password: _, ...safeUser } = user.toObject();
 
       return res.status(201).json({
         message: "Please login to continue",
@@ -89,7 +89,7 @@ authRouter.post(
         },
       );
 
-      const { password: _, safeUser } = existingUser;
+      const { password: _, safeUser } = existingUser.toObject();
 
       return res.status(201).json({
         message: "Welcome to bike showroom",
@@ -113,7 +113,7 @@ authRouter.post(
 
 authRouter.get("/me", requireAuth(), async (req, res) => {
   try {
-    const { password, ...safeUser } = req.user;
+    const { password, ...safeUser } = req.user.toObject();
 
     return res.status(200).json({
       message: "Your profile",
