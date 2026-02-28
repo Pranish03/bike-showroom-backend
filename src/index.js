@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: `${process.env.CLIENT_URL}`,
     credentials: true,
   }),
 );
@@ -33,8 +33,8 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGO_URL);
     if (!conn) throw new Error("Failed to connect to DB");
 
-    app.listen(3000, () => {
-      console.log("Server is running on http://localhost:3000");
+    app.listen(process.env.PORT || 3000, () => {
+      console.log(`Server is running on ${process.env.SERVER_URL}`);
     });
   } catch (error) {
     console.error("Failed to connect to database", err);
