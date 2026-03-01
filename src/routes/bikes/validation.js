@@ -11,8 +11,4 @@ export const createBikeValidationSchema = z.object({
   details: z.string().optional(),
 });
 
-export const updateBikeValidationSchema = createBikeValidationSchema
-  .partial()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field must be provided for update",
-  });
+export const updateBikeValidationSchema = createBikeValidationSchema.partial();
